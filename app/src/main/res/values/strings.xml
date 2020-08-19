@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">YouTube Start End Time</string>
+    <string name="instructions">"Input a YouTube Link. EX:"\n
+        "https://www.youtube.com/watch?v=wvenu6GTe5z"\n
+        "or"\n
+        "https://youtu.be/wvenu6GTe5z"\n
+        "and specify the start and/or end time."</string>
+    <string name="youtube_link">"Paste YouTube Link"</string>
+    <string name="start_sec">"Start Sec"</string>
+    <string name="start_min">"Start Min"</string>
+    <string name="start_hour">"Start Hour"</string>
+    <string name="end_sec">"End Sec"</string>
+    <string name="end_min">"End Min"</string>
+    <string name="end_hour">"End Hour"</string>
+    <string name="get_link">"Get Link"</string>
+    <string name="copy">"Copy"</string>
+    <string name="share">"Share"</string>
+    <string name="show_saved">"Show Saved Links"</string>
+</resources>

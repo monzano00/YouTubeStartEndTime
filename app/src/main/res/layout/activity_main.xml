@@ -8,8 +8,8 @@
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="254dp"
-        android:layout_height="110dp"
+        android:layout_width="323dp"
+        android:layout_height="102dp"
         android:layout_marginTop="60dp"
         android:text="@string/instructions"
         android:textSize="14sp"

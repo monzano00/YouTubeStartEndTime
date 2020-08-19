@@ -4,18 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbarAlwaysDrawHorizontalTrack="true"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
     tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="323dp"
         android:layout_height="102dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginBottom="10dp"
         android:text="@string/instructions"
         android:textSize="14sp"
         app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toTopOf="@+id/youtube_link"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -123,15 +126,15 @@
 
     <EditText
         android:id="@+id/youtube_link"
-        android:layout_width="322dp"
-        android:layout_height="45dp"
+        android:layout_width="206dp"
+        android:layout_height="50dp"
         android:autofillHints="name"
         android:ems="10"
         android:hint="@string/youtube_link"
         android:inputType="textPersonName"
         app:layout_constraintBottom_toTopOf="@+id/start_min"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintHorizontal_bias="0.214"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         app:layout_constraintVertical_bias="0.322" />
@@ -166,5 +169,16 @@
         android:text="@string/share"
         app:layout_constraintEnd_toEndOf="@+id/result_link"
         app:layout_constraintTop_toBottomOf="@+id/result_link" />
+
+    <Button
+        android:id="@+id/paste_btn"
+        android:layout_width="92dp"
+        android:layout_height="43dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginBottom="12dp"
+        android:text="@string/paste"
+        app:layout_constraintBottom_toTopOf="@+id/start_sec"
+        app:layout_constraintStart_toEndOf="@+id/youtube_link" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

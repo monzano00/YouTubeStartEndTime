@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         Button get_link_btn = findViewById(R.id.get_link_btn);
         final TextView result_link = findViewById(R.id.result_link);
         Button copy_link_btn = findViewById(R.id.copy_btn);
+        Button paste_link_btn = findViewById(R.id.paste_btn);
         share = findViewById(R.id.share_btn);
         myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
@@ -323,6 +324,22 @@ public class MainActivity extends AppCompatActivity {
                 myClipboard.setPrimaryClip(clip);
 
                 Toast.makeText(MainActivity.this, "Copied", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+        paste_link_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipData clipData = myClipboard.getPrimaryClip();
+                ClipData.Item item = clipData.getItemAt(0);
+
+                EditText youtube_link = (EditText) findViewById(R.id.youtube_link);
+
+                youtube_link.setText(item.getText().toString());
+                Toast.makeText(MainActivity.this, "Pasted", Toast.LENGTH_SHORT).show();
+
+
 
             }
         });

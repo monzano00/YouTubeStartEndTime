@@ -34,9 +34,10 @@
         android:ems="10"
         android:hint="@string/start_hour"
         android:inputType="number"
-        app:autoSizeTextType="uniform"
-        app:autoSizeMinTextSize="12sp"
+        android:textSize="17sp"
         app:autoSizeMaxTextSize="100sp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toBottomOf="@+id/start_min"
         app:layout_constraintEnd_toStartOf="@+id/start_min"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
@@ -201,6 +202,8 @@
         android:longClickable="false"
         android:text="@string/paste"
         app:layout_constraintBottom_toTopOf="@+id/start_sec"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.022"
         app:layout_constraintStart_toEndOf="@+id/youtube_link" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

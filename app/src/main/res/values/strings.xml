@@ -11,6 +11,7 @@
     <string name="get_link">"Get Link"</string>
     <string name="copy">"Copy"</string>
     <string name="share">"Share"</string>
+    <string name="open">"Open"</string>
     <string name="paste">"Paste"</string>
     <string name="show_saved">"Show Saved Links"</string>
 

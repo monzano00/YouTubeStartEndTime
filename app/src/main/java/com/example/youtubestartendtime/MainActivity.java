@@ -1,10 +1,13 @@
 package com.example.youtubestartendtime;
 
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,8 +29,10 @@ public class MainActivity extends AppCompatActivity {
 
         Button get_link_btn = findViewById(R.id.get_link_btn);
         final TextView result_link = findViewById(R.id.result_link);
+        result_link.setMovementMethod(LinkMovementMethod.getInstance());
         Button copy_link_btn = findViewById(R.id.copy_btn);
         Button paste_link_btn = findViewById(R.id.paste_btn);
+        Button open_btn = findViewById(R.id.open_btn);
         share = findViewById(R.id.share_btn);
         myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
@@ -373,5 +378,73 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 });
+                result_link.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                        browserIntent.setData(Uri.parse(result_link.getText().toString()));
+                        startActivity(browserIntent);
+                        //https://stackoverflow.com/questions/43025993/how-do-i-open-a-browser-on-clicking-a-text-link-in-textview
+                    }
+                });
+
+                open_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW,Uri.parse(result_link.getText().toString()));
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.setPackage("com.android.chrome");
+                        try {
+                            startActivity(intent);
+                        } catch (ActivityNotFoundException ex) {
+                            // Chrome browser presumably not installed so allow user to choose instead
+                            intent.setPackage(null);
+                            intent.setPackage("org.mozilla.firefox");
+                            try {
+                                startActivity(intent);
+                            } catch(ActivityNotFoundException ex2) {
+                                // Firefox not installed
+                                intent.setPackage(null);
+                                intent.setPackage("com.opera.browser");
+                                try {
+                                    startActivity(intent);
+                                } catch (ActivityNotFoundException ex3) {
+                                    //Opera not installed
+                                    intent.setPackage(null);
+                                    intent.setPackage("com.samsung.android.app.sbrowseredge");
+                                    try {
+                                        startActivity(intent);
+                                    } catch (ActivityNotFoundException ex4) {
+                                        intent.setPackage(null);
+                                        intent.setPackage("com.microsoft.emmx");
+                                        try {
+                                            startActivity(intent);
+                                        } catch(ActivityNotFoundException ex5){
+                                            intent.setPackage(null);
+                                            intent.setPackage("org.torproject.torbrowser");
+                                            try {
+                                                startActivity(intent);
+                                            } catch(ActivityNotFoundException ex6){
+                                                intent.setPackage(null);
+                                                intent.setPackage("com.vivaldi.browser");
+                                                try{
+                                                    startActivity(intent);
+                                                } catch(ActivityNotFoundException ex7){
+                                                    intent.setPackage(null);
+                                                    startActivity(intent);
+                                                }
+
+
+                                            }
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
     }
 }

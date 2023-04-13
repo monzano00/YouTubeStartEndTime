@@ -146,10 +146,22 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="@string/get_link"
-        app:layout_constraintEnd_toEndOf="@+id/end_min"
+        app:layout_constraintEnd_toEndOf="@+id/end_hour"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="@+id/end_min"
-        app:layout_constraintTop_toBottomOf="@+id/end_min" />
+        app:layout_constraintStart_toStartOf="@+id/end_hour"
+        app:layout_constraintTop_toBottomOf="@+id/end_hour" />
+
+    <Button
+        android:id="@+id/download_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/downloadVideo"
+        android:onClick="downloadVideo"
+        app:layout_constraintEnd_toEndOf="@+id/end_sec"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/end_sec"
+        app:layout_constraintTop_toBottomOf="@+id/end_sec" />
 
     <EditText
         android:id="@+id/youtube_link"

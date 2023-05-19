@@ -1466,3 +1466,4 @@ private String getRealPathFromUri(Uri uri) {
 
 can add about section
 dialog prompt if user would like to download a video already in downloads
+https://github.com/yausername/youtubedl-android implement if videos download not working

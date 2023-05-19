@@ -1,0 +1,1468 @@
+Learning:
+- Manage Write External Storage Permission android 13 | Android 13 Storage Permission
+    https://www.youtube.com/watch?v=6cxTVPFYaTw
+    https://github.com/raimiss8/Android-13-Permissions/blob/a64dd9080eea55c4bd591d111b486b8c1585ebf0/app/src/main/java/com/esolar/readwritepermisionsapp/MainActivity.java
+- How to create and save an image file in Download folder from your Android App? - Android 13 | API 33
+    https://www.youtube.com/watch?v=uMfaRApmabA
+    https://programmerworld.co/android/how-to-create-and-save-an-image-file-in-download-folder-from-your-android-app-android-13-api-33/
+- How to programmatically move, copy and delete files and directories on SD?
+    https://stackoverflow.com/questions/4178168/how-to-programmatically-move-copy-and-delete-files-and-directories-on-sd
+- Youtube extractor github
+    https://github.com/HaarigerHarald/android-youtubeExtractor
+    https://gist.github.com/fnk0/51932c9ff5ec79f55c40
+- Downloading Media in Android (Download Manager)
+    https://www.nexmobility.com/articles/downloading-media-in-android.html
+- Android studio for beginners part 1
+    https://www.youtube.com/watch?v=dFlPARW5IX8
+    https://www.youtube.com/watch?v=6ow3L39Wxmg
+- Video Trimmers
+    https://github.com/sannies/mp4parser/blob/master/examples/src/main/java/com/googlecode/mp4parser/ShortenExample.java
+    https://github.com/a914-gowtham/Android-video-trimmer
+- How to get the Full file path from URI
+    https://stackoverflow.com/questions/13209494/how-to-get-the-full-file-path-from-uri
+
+ @Override
+            public void onUrisAvailable(String videoId, String videoTitle, SparseArray<YtFile> ytFiles) {
+                if (ytFiles != null) {
+                    int itag = 22;
+                    newLink = ytFiles.get(itag).getUrl();
+                    String title = linkToFile(videoTitle);
+
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(newLink));
+                    request.setTitle("download");
+                    request.setDescription("Your file is downloading");
+//                  some videos like this one don't work.      https://www.youtube.com/watch?v=GJVrna5Rm5U
+//                      throws a attempt to invoke virtual method on a null object reference on .getUrl();
+//                        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                    @SuppressLint({"StaticFieldLeak", "ServiceCast"}) DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                    request.allowScanningByMediaScanner();
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setDestinationInExternalFilesDir(downloads, Environment.DIRECTORY_DOWNLOADS, title);
+//                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+//                    https://www.youtube.com/watch?v=JJilnzWpUdI
+                    manager.enqueue(request);
+//                        test video: https://www.youtube.com/watch?v=TnlakHr-O4w
+
+//                        try {
+//                            downloadUrl = ytFiles.get(itag).getUrl();
+//                            if (downloadUrl != null) {
+//
+//                                Toast.makeText(MainActivity.this, "Download started...", Toast.LENGTH_SHORT).show();
+//
+//                                Log.d("DOWNLOAD URL ", "URL :=" + downloaderUrl);
+//
+//                            }
+//                        } catch (Exception e) {
+//                            Toast.makeText(MainActivity.this, "download url could not be fetched", Toast.LENGTH_SHORT).show();
+//                        }
+
+                }
+            }
+        };
+        videoget.execute(values);
+
+
+    }
+
+//get permission to store video
+    public void requestPermissionsStorageVideo() {
+//        https://github.com/raimiss8/Android-13-Permissions/blob/a64dd9080eea55c4bd591d111b486b8c1585ebf0/app/src/main/java/com/esolar/readwritepermisionsapp/MainActivity.java
+
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, required_permissions[1]) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, required_permissions[1] + " Granted");
+
+            is_storage_video_permitted = true;
+            request_permission_launcher_storage_video.launch(required_permissions[1]);
+
+        }
+    }
+
+    private ActivityResultLauncher<String> request_permission_launcher_storage_video =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                    isGranted -> {
+                        if (isGranted)  //java8
+                        {
+                            Log.d(TAG, required_permissions[1] + " Granted");
+
+                            is_storage_video_permitted = true;
+                        } else {
+                            Log.d(TAG, required_permissions[1] + " Not Granted");
+                            is_storage_video_permitted = false;
+                        }
+
+                    });
+
+    public void sendToSettingDialog() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Alert for Permission")
+                .setMessage("Go to Settings for Permissions")
+                .setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ///  code to go to settings of application
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        finish();
+                    }
+                }).show();
+    }
+
+else if (youtube_link.getText().toString().length() > 1000) {
+
+            String values = alter_link(true);
+            YouTubeUriExtractor videoget = new YouTubeUriExtractor(MainActivity.this) {
+                @Override
+                public void onUrisAvailable(String videoId, String videoTitle, SparseArray<YtFile> ytFiles) {
+                    // videoId = JJilnzWpUdI
+                    // videoTitle = Viper Rambles Is Now Cancelled
+
+                    if (ytFiles != null) {
+                        int itag = 22;
+                        newLink = ytFiles.get(itag).getUrl();
+                        String recentFile = linkToFile(videoTitle);
+
+
+//            String extra = "/Download/";
+
+                        String extra = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/YouTubeSEClips/";
+
+//                    String androidData = "/Android/data/com.example.youtubestartendtime/files/Download/";
+
+//                        String recentFileLoc = storageVolume.getDirectory().toString() + recentFile;
+//                    String recentFileLoc = "file://" + storageVolume.getDirectory().toString() + androidData + recentFile;
+
+                        moveFile(recentFileLoc[0], recentFileName[0], extra);
+
+
+//                    String rfl = storageVolume.getDirectory().toString() + androidData + title;
+//
+//
+                    }
+                }
+            };
+            videoget.execute(values);
+//        if try to download from 0 to index of s_to_ is equal but after is not, rename file
+//        if try to download and 0 to index of s_to_ is not equal, throw error for must download new video
+
+
+private boolean trimFile(String inputPath, String inputFile) {
+
+        TextView result_link = (TextView) findViewById(R.id.result_link);
+
+        FFmpegMediaMetadataRetriever mmr = new FFmpegMediaMetadataRetriever();
+
+        mmr.setDataSource(inputPath + inputFile);
+        String durationStr = mmr.extractMetadata(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION);
+        long duration = Long.parseLong(durationStr);
+
+
+        int endTime = convertEndHMSToSeconds();
+        int startTime = convertStartHMSToSeconds();
+
+
+//        check if video can be trimmed with times given
+        if (endTime > duration / 1000) {
+            result_link.setText("End time cannot be greater than video duration");
+            return false;
+        } else if (startTime > duration / 1000) {
+            result_link.setText("Start time cannot be greater than video duration");
+            return false;
+        } else if (endTime <= startTime) {
+            result_link.setText("Start time cannot be greater than End time");
+            return false;
+        }
+
+        String videoFileName = inputFile;
+        String videoFilePath = inputPath + inputFile;
+        String trimmedVideoFileName = linkToFile(videoFileName, false);
+        String trimmedVideoFilePath = inputPath + trimmedVideoFileName;
+
+//        /storage/emulated/0/Download/YouTubeSEClips//trimmed_Viper_Rambles_Is_Now_Cancelled.mp4
+
+
+        FFmpeg ffmpeg = FFmpeg.getInstance(this);
+//        ffmpeg.execute("-i "+videoFilePath+" -ss "+startTime+" -to "+endTime+" -c copy "+trimmedVideoFilePath+" ",
+//        ffmpeg.execute("-i " + videoFilePath + " -ss " + startTime + " -to " + endTime + " -c copy " + trimmedVideoFilePath,
+
+        String[] ffmpegCommand = {"-y", "-i", videoFilePath, "-ss", String.valueOf(startTime), "-to",
+                String.valueOf(endTime), "-c:v", "copy", "-c:a", "copy", trimmedVideoFilePath};
+//        FFmpeg.execute(ffmpegCommand);
+
+//        Candidates for method call ffmpeg.execute("-i " +
+//                videoFilePath + " -ss " + startTime + " -to " + endTime +
+//                " -c copy " + trimmedVideoFilePath, new ExecuteBinaryResponseHandler()
+//        { // String[] ffmpegCommand = {"-y", "-i", videoFilePath,
+//            // "-ss", String.valueOf(startTime), "-to", String.valueOf(endTime),
+//            // "-c:v", "copy", "-c:a", "copy", trimmedVideoFilePath};
+//            // FFmpeg.execute(ffmpegCommand); @Override public void onStart() {}
+//            // public void onFailure() {} public void onSuccess() {}
+//            // @Override public void onFinish() {} }) are:
+//            // void execute(Map<String, String>, String[], FFmpegExecuteResponseHandler)
+//            // void execute(String[], FFmpegExecuteResponseHandler)
+        try {
+            ffmpeg.loadBinary(new LoadBinaryResponseHandler() {
+                @Override
+                public void onStart() {
+                }
+
+                @Override
+                public void onFailure() {
+                }
+
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onFinish() {
+                }
+            });
+
+        } catch (FFmpegNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+        ffmpeg.execute(ffmpegCommand,
+                new ExecuteBinaryResponseHandler() {
+//        String[] ffmpegCommand = {"-y", "-i", videoFilePath, "-ss", String.valueOf(startTime), "-to", String.valueOf(endTime), "-c:v", "copy", "-c:a", "copy", trimmedVideoFilePath};
+//        FFmpeg.execute(ffmpegCommand);
+
+                @Override
+                public void onStart() {
+                    Log.w(null, "Cut started");
+                }
+
+                @Override
+                public void onFailure(String message) {
+                    Log.w(null, message.toString());
+
+                }
+
+                @Override
+                public void onSuccess(String message) {
+                    Log.w(null, message.toString());
+
+                }
+
+                @Override
+                public void onFinish() {
+                    Log.w(null, "Cutting video finished");
+                }
+            });
+        } catch(FFmpegCommandAlreadyRunningException e) {
+            String temp = "llkkl";
+            // Handle if FFmpeg is not supported by device
+        }
+
+        recentFileLoc[0]=inputPath;
+        recentFileName[0]=trimmedVideoFileName;
+        return true;
+
+    }
+
+
+    public void videoTrim(String videoFilePath) {
+            // open the file picker to select a video file
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.setType("video/*");
+            startActivityForResult(Intent.createChooser(intent, "Select Video"), PICK_VIDEO_REQUEST);
+
+    // extract frames from the video and display them in a preview
+            MediaExtractor extractor = new MediaExtractor();
+            try {
+                extractor.setDataSource(videoFilePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            int videoTrackIndex = findVideoTrackIndex(extractor);
+            MediaFormat format = extractor.getTrackFormat(videoTrackIndex);
+            MediaCodec decoder = null;
+            try {
+                decoder = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            decoder.configure(format, surface, null, 0);
+            decoder.start();
+
+    // select a start and end time
+            int startTimeMs = 5000;
+            int endTimeMs = 10000;
+
+    // extract video frames within the selected range
+            extractor.seekTo(startTimeMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+            ByteBuffer inputBuffer = ByteBuffer.allocate(0);
+            while (extractor.getSampleTime() < endTimeMs * 1000) {
+                int index = decoder.dequeueInputBuffer(10000);
+                if (index >= 0) {
+                    inputBuffer = decoder.getInputBuffer(index);
+                    int size = extractor.readSampleData(inputBuffer, 0);
+                    if (size < 0) {
+                        decoder.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                    } else {
+                        decoder.queueInputBuffer(index, 0, size, extractor.getSampleTime(), 0);
+                        extractor.advance();
+                    }
+                }
+                MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+                int outputBufferIndex = decoder.dequeueOutputBuffer(info, 10000);
+                if (outputBufferIndex >= 0) {
+                    ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+                    byte[] buffer = new byte[info.size];
+                    outputBuffer.get(buffer);
+                    muxer.writeSampleData(trackIndex, outputBuffer, info);
+                    decoder.releaseOutputBuffer(outputBufferIndex, false);
+                }
+            }
+
+    // combine trimmed video frames into a new video file
+            MediaMuxer muxer = new MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            int trackIndex = muxer.addTrack(format);
+            muxer.start();
+
+        }
+
+
+    private String getRealPathFromURI(Uri uri) {
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
+
+    private void processVideoFile(String videoPath) {
+        // implement the video trimming logic here
+    }
+
+
+ @SuppressLint("WrongConstant")
+    public static File trimVideo(Context context, Uri uri, long startMs, long endMs, String outputName, String outputPath, VideoTrimmingListener listener) throws IOException {
+
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(context, uri, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            listener.onTrimError(e.getMessage());
+            return null;
+        }
+
+        int trackCount = extractor.getTrackCount();
+        int videoTrackIndex = selectTrack(extractor, false);
+        if (videoTrackIndex < 0) {
+            listener.onTrimError("No video track found in " + uri);
+            return null;
+        }
+//
+        extractor.selectTrack(videoTrackIndex);
+        MediaFormat videoFormat = extractor.getTrackFormat(videoTrackIndex);
+
+        int videoTrackIndexOutput = -1;
+
+        // Create the output muxer
+        MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+        videoTrackIndexOutput = muxer.addTrack(videoFormat);
+
+//        int audioTrackIndex = selectTrack(extractor, true);
+//        extractor.selectTrack(audioTrackIndex);
+
+        MediaFormat inputFormat = extractor.getTrackFormat(videoTrackIndex);
+
+        int width = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
+        int height = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
+        long duration = inputFormat.getLong(MediaFormat.KEY_DURATION);
+//        81000000
+
+
+        long originalDuration = duration / 1000; // Convert duration to seconds
+
+        if (startMs > originalDuration || endMs > originalDuration || startMs >= endMs) {
+            listener.onTrimError("Invalid trim range specified");
+            return null;
+        }
+
+
+        int outputTrackIndex = muxer.addTrack(inputFormat);
+
+        muxer.start();
+
+        extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+
+        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+        ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024); // 1 MB buffer
+        while (true) {
+            int sampleSize = extractor.readSampleData(buffer, 0);
+            if (sampleSize < 0) {
+                // End of input stream
+                break;
+            }
+
+            long presentationTimeUs = extractor.getSampleTime();
+
+            if (presentationTimeUs > endMs * 1000) {
+                // Reached end of trimming range
+                break;
+            }
+
+            bufferInfo.size = sampleSize;
+            bufferInfo.presentationTimeUs = presentationTimeUs - startMs * 1000;
+            bufferInfo.flags = extractor.getSampleFlags();
+//
+//            int bufferFlags = bufferInfo.flags;
+//            bufferInfo.flags = (bufferFlags == MediaCodec.BUFFER_FLAG_KEY_FRAME) ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0;
+
+
+            muxer.writeSampleData(outputTrackIndex, buffer, bufferInfo);
+
+            extractor.advance();
+        }
+
+        muxer.stop();
+        muxer.release();
+        extractor.release();
+
+        if (listener != null) {
+            listener.onTrimCompleted(String.valueOf(Uri.parse(outputPath)));
+        }
+        return null;
+    }
+
+    @SuppressLint("WrongConstant")
+        public static File trimVideo(Context context, Uri uri, long startMs, long endMs, String outputName, String outputPath, VideoTrimmingListener listener) throws IOException {
+
+            MediaExtractor extractor = new MediaExtractor();
+            try {
+                extractor.setDataSource(context, uri, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+                listener.onTrimError(e.getMessage());
+                return null;
+            }
+
+            int trackCount = extractor.getTrackCount();
+            int videoTrackIndex = selectTrack(extractor, false);
+            if (videoTrackIndex < 0) {
+                listener.onTrimError("No video track found in " + uri);
+                return null;
+            }
+    //
+            extractor.selectTrack(videoTrackIndex);
+            MediaFormat videoFormat = extractor.getTrackFormat(videoTrackIndex);
+
+            int videoTrackIndexOutput = -1;
+            long duration = videoFormat.getLong(MediaFormat.KEY_DURATION);
+
+            // Create the output muxer
+            MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            videoTrackIndexOutput = muxer.addTrack(videoFormat);
+
+            int audioTrackIndex = selectTrack(extractor, true);
+            extractor.selectTrack(audioTrackIndex);
+
+            long originalDuration = duration / 1000; // Convert duration to seconds
+
+            if (startMs > originalDuration || endMs > originalDuration || startMs >= endMs) {
+                listener.onTrimError("Invalid trim range specified");
+                return null;
+            }
+
+
+            if (audioTrackIndex != -1) {
+                MediaFormat audioFormat = extractor.getTrackFormat(audioTrackIndex);
+                int audioTrackIndexOutput = muxer.addTrack(audioFormat);
+
+                muxer.start();
+
+                // Set the sample size
+                ByteBuffer buffer = ByteBuffer.allocate(4 * 1024);
+                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+
+                extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+                while (true) {
+                    int sampleSize = extractor.readSampleData(buffer, 0);
+                    if (sampleSize < 0) {
+                        break;
+                    }
+
+                    long presentationTimeUs = extractor.getSampleTime();
+                    if (presentationTimeUs > endMs * 1000) {
+                        break;
+                    }
+
+                    bufferInfo.offset = 0;
+                    bufferInfo.size = sampleSize;
+                    bufferInfo.flags = extractor.getSampleFlags();
+                    bufferInfo.presentationTimeUs = presentationTimeUs;
+
+                    if (extractor.getSampleTrackIndex() == videoTrackIndex) {
+                        muxer.writeSampleData(videoTrackIndexOutput, buffer, bufferInfo);
+                    } else if (extractor.getSampleTrackIndex() == audioTrackIndex) {
+                        muxer.writeSampleData(audioTrackIndexOutput, buffer, bufferInfo);
+                    }
+
+                    extractor.advance();
+                }
+
+            }
+
+    ////        int width = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
+    ////        int height = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
+    ////        long duration = inputFormat.getLong(MediaFormat.KEY_DURATION);
+    //////        81000000
+
+
+
+    //        int outputTrackIndex = muxer.addTrack(inputFormat);
+
+    //
+    //        extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+    //
+    //        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+    //        ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024); // 1 MB buffer
+    //        while (true) {
+    //            int sampleSize = extractor.readSampleData(buffer, 0);
+    //            if (sampleSize < 0) {
+    //                // End of input stream
+    //                break;
+    //            }
+    //
+    //            long presentationTimeUs = extractor.getSampleTime();
+    //
+    //            if (presentationTimeUs > endMs * 1000) {
+    //                // Reached end of trimming range
+    //                break;
+    //            }
+    //
+    //            bufferInfo.size = sampleSize;
+    //            bufferInfo.presentationTimeUs = presentationTimeUs - startMs * 1000;
+    //            bufferInfo.flags = extractor.getSampleFlags();
+    ////
+    ////            int bufferFlags = bufferInfo.flags;
+    ////            bufferInfo.flags = (bufferFlags == MediaCodec.BUFFER_FLAG_KEY_FRAME) ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0;
+    //
+    //
+    //            muxer.writeSampleData(outputTrackIndex, buffer, bufferInfo);
+    //
+    //            extractor.advance();
+    //        }
+
+            muxer.stop();
+            muxer.release();
+            extractor.release();
+
+            if (listener != null) {
+                listener.onTrimCompleted(String.valueOf(Uri.parse(outputPath)));
+            }
+            return null;
+        }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK) {
+//            Uri videoUri = Uri.parse(data.getData().getPath());
+//
+////            if (videoUri != null) {
+////                // Use DocumentFile API to get file name from URI
+////                DocumentFile documentFile = DocumentFile.fromSingleUri(this, uri);
+////                if (documentFile != null) {
+////                    fileName = documentFile.getName();
+////                }
+////            }
+//
+//            String filePath = getFilePathFromUri(videoUri);
+//
+//            int x = 3;
+//
+//            // Do something with the video URI
+//        }
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        Context context = getApplicationContext();
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode==requestCode && resultCode==RESULT_OK){
+//            if (data == null) {
+//                return;
+//            }
+//            Uri uri = data.getData();
+//            Toast.makeText(context, uri.getPath(), Toast.LENGTH_SHORT).show();
+//
+//        }
+//
+//    }
+
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK) {
+//            // get the selected video file
+//            Uri videoUri = data.getData();
+//            String videoPath = getRealPathFromURI(videoUri);
+//            // start processing the video file
+//            processVideoFile(videoPath);
+//        }
+//    }
+//
+
+//    @SuppressLint("WrongConstant")
+//    public static File trimVideo(Context context, Uri uri, long startMs, long endMs, String outputName, String outputPath, VideoTrimmingListener listener) throws IOException {
+//
+//        MediaExtractor extractor = new MediaExtractor();
+//        try {
+//            extractor.setDataSource(context, uri, null);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            listener.onTrimError(e.getMessage());
+//            return null;
+//        }
+//
+//        int trackCount = extractor.getTrackCount();
+//        int videoTrackIndex = selectTrack(extractor, false);
+//        if (videoTrackIndex < 0) {
+//            listener.onTrimError("No video track found in " + uri);
+//            return null;
+//        }
+////
+////        MediaFormat videoFormat = extractor.getTrackFormat(videoTrackIndex);
+////        int videoTrackIndexOutput = -1;
+//
+//        extractor.selectTrack(videoTrackIndex);
+//
+//        MediaFormat inputFormat = extractor.getTrackFormat(videoTrackIndex);
+//
+//        int width = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
+//        int height = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
+//        long duration = inputFormat.getLong(MediaFormat.KEY_DURATION);
+////        81000000
+//
+//
+//        long originalDuration = duration / 1000; // Convert duration to seconds
+//
+//        if (startMs > originalDuration || endMs > originalDuration || startMs >= endMs) {
+//            listener.onTrimError("Invalid trim range specified");
+//            return null;
+//        }
+//
+//        MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//
+//        int outputTrackIndex = muxer.addTrack(inputFormat);
+//
+//        muxer.start();
+//
+//        extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+//
+//        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//        ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024); // 1 MB buffer
+//        while (true) {
+//            int sampleSize = extractor.readSampleData(buffer, 0);
+//            if (sampleSize < 0) {
+//                // End of input stream
+//                break;
+//            }
+//
+//            long presentationTimeUs = extractor.getSampleTime();
+//
+//            if (presentationTimeUs > endMs * 1000) {
+//                // Reached end of trimming range
+//                break;
+//            }
+//
+//            bufferInfo.size = sampleSize;
+//            bufferInfo.presentationTimeUs = presentationTimeUs - startMs * 1000;
+//            bufferInfo.flags = extractor.getSampleFlags();
+////
+////            int bufferFlags = bufferInfo.flags;
+////            bufferInfo.flags = (bufferFlags == MediaCodec.BUFFER_FLAG_KEY_FRAME) ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0;
+//
+//
+//            muxer.writeSampleData(outputTrackIndex, buffer, bufferInfo);
+//
+//            extractor.advance();
+//        }
+//
+//        muxer.stop();
+//        muxer.release();
+//        extractor.release();
+//
+//        if (listener != null) {
+//            listener.onTrimCompleted(String.valueOf(Uri.parse(outputPath)));
+//        }
+//        return null;
+//    }
+
+
+//    public static void trimVideoFile(String inputPath, String outputPath, int startMs, int endMs) throws IOException {
+//        Movie movie = MovieCreator.build(inputPath);
+//        List<Track> tracks = movie.getTracks();
+//        movie.setTracks(new LinkedList<Track>());
+//
+//        double startTime = startMs / 1000.0;
+//        double endTime = endMs / 1000.0;
+//        boolean timeCorrected = false;
+//
+//        for (Track track : tracks) {
+//            if (track.getSyncSamples() != null && track.getSyncSamples().length > 0) {
+//                if (timeCorrected) {
+//                    throw new RuntimeException("The startTime has already been corrected by another track with SyncSample. Not Supported.");
+//                }
+//                startTime = correctTimeToSyncSample(track, startTime, false);
+//                endTime = correctTimeToSyncSample(track, endTime, true);
+//                timeCorrected = true;
+//            }
+//        }
+//
+//        for (Track track : tracks) {
+//            long currentSample = 0;
+//            double currentTime = 0;
+//            long startSample = -1;
+//            long endSample = -1;
+//
+//            for (int i = 0; i < track.getSampleDurations().length; i++) {
+//                long delta = track.getSampleDurations()[i];
+//                if (currentTime <= startTime) {
+//                    startSample = currentSample;
+//                }
+//                if (currentTime <= endTime) {
+//                    endSample = currentSample;
+//                } else {
+//                    break;
+//                }
+//                currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
+//                currentSample++;
+//            }
+//
+//            movie.addTrack(new CroppedTrack(track, startSample, endSample));
+//        }
+//
+//        Container out = new DefaultMp4Builder().build(movie);
+//        FileOutputStream fos = new FileOutputStream(new File(outputPath));
+//        FileChannel fc = fos.getChannel();
+//        out.writeContainer(fc);
+//        fc.close();
+//        fos.close();
+//    }
+//
+//    private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
+//        double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
+//        long currentSample = 0;
+//        double currentTime = 0;
+//        for (int i = 0; i < track.getSampleDurations().length; i++) {
+//            long delta = track.getSampleDurations()[i];
+//
+//            if (Arrays.binarySearch(track.getSyncSamples(), currentSample + 1) >= 0) {
+//                timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(), currentSample + 1)] = currentTime;
+//            }
+//            currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
+//            currentSample++;
+//        }
+//        double previous = 0;
+//        for (double timeOfSyncSample : timeOfSyncSamples) {
+//            if (timeOfSyncSample > cutHere) {
+//                if (next) {
+//                    return timeOfSyncSample;
+//                } else {
+//                    return previous;
+//                }
+//            }
+//            previous = timeOfSyncSample;
+//        }
+//        return timeOfSyncSamples[timeOfSyncSamples.length - 1];
+//    }
+
+
+//    public void trimVideoFile(String source, String destination, int startTimeMs, int endTimeMs) throws IOException {
+//        String videoFileSource = recentFileLoc[0] + recentFileName[0];
+//        String videoFileName = recentFileName[0];
+//        String trimmedVideoFileName = linkToFile(videoFileName, false);
+////            trimmedVideoFileName = video_6s_to_68s.mp4
+//        String trimmedVideoFilePath = recentFileLoc[0] + trimmedVideoFileName;
+//
+//        Movie movie = MovieCreator.build(source);
+//        List<Track> tracks = movie.getTracks();
+//        movie.setTracks(new LinkedList<Track>());
+//        double startTime = startTimeMs / 1000.0;
+//        double endTime = endTimeMs / 1000.0;
+//        boolean timeCorrected = false;
+//        for (Track track : tracks) {
+//            if (track.getSyncSamples() != null && track.getSyncSamples().length > 0) {
+//                if (timeCorrected) {
+//                    throw new RuntimeException("The startTime has already been corrected by another track with SyncSample. Not Supported.");
+//                }
+//                startTime = correctTimeToSyncSample(track, startTime, false);
+//                endTime = correctTimeToSyncSample(track, endTime, true);
+//                timeCorrected = true;
+//            }
+//        }
+//        for (Track track : tracks) {
+//            long currentSample = 0;
+//            double currentTime = 0;
+//            long startSample = -1;
+//            long endSample = -1;
+//            for (int i = 0; i < track.getSampleDurations().length; i++) {
+//                long delta = track.getSampleDurations()[i];
+//                if (currentTime <= startTime) {
+//                    startSample = currentSample;
+//                }
+//                if (currentTime <= endTime) {
+//                    endSample = currentSample;
+//                } else {
+//                    break;
+//                }
+//                currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
+//                currentSample++;
+//            }
+//            movie.addTrack(new CroppedTrack(track, startSample, endSample));
+//        }
+//        Container out = new DefaultMp4Builder().build(movie);
+//        FileOutputStream fos = new FileOutputStream(destination);
+//        FileChannel fc = fos.getChannel();
+//        out.writeContainer(fc);
+//        fc.close();
+//        fos.close();
+//        recentFileLoc[0] = trimmedVideoFilePath;
+//        recentFileName[0] = trimmedVideoFileName;
+//
+//
+//    }
+//
+//    private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
+//        double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
+//        long currentSample = 0;
+//        double currentTime = 0;
+//        for (int i = 0; i < track.getSampleDurations().length; i++) {
+//            long delta = track.getSampleDurations()[i];
+//            if (Arrays.binarySearch(track.getSyncSamples(), currentSample + 1) >= 0) {
+//                timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(), currentSample + 1)] = currentTime;
+//            }
+//            currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
+//            currentSample++;
+//        }
+//        double previous = 0;
+//        for (double timeOfSyncSample : timeOfSyncSamples) {
+//            if (timeOfSyncSample > cutHere) {
+//                if (next) {
+//                    return timeOfSyncSample;
+//                } else {
+//                    return previous;
+//                }
+//            }
+//            previous = timeOfSyncSample;
+//        }
+//        return timeOfSyncSamples[timeOfSyncSamples.length - 1];
+//    }
+//
+//    public static void trimVideoFile(String srcPath, String outputPath, double startMs, double endMs) throws IOException {
+//
+//        // Create movie object from the source file
+//        Movie movie = MovieCreator.build(srcPath);
+//
+//
+//        // Get the video track from the movie object
+//        Track videoTrack = movie.getTracks().get(0);
+//
+//        // Calculate the start and end timestamps in microseconds
+//        double startTimeUs = startMs * 1000;
+//        double endTimeUs = endMs * 1000;
+//
+//        // Calculate the duration of the trimmed video
+//        long durationUs = (long) (endTimeUs - startTimeUs);
+//
+//        // Create a new movie object that contains only the trimmed video
+//        Movie result = new Movie();
+//        result.addTrack(new CroppedTrack(videoTrack, (long) startTimeUs, durationUs));
+//
+//        // Write the trimmed video to the output file
+//        Container out = new DefaultMp4Builder().build(result);
+//        FileChannel fc = new RandomAccessFile(outputPath, "rw").getChannel();
+//        out.writeContainer(fc);
+//        fc.close();
+//    }
+//    private boolean trimVideoFile(String inputPath, String inputFile) throws IOException {
+//        MediaExtractor extractor = new MediaExtractor();
+//        extractor.setDataSource(inputPath + inputFile);
+//
+//        int startMs = convertStartHMSToSeconds() * 1000;
+//        int endMs = convertEndHMSToSeconds() * 1000;
+//
+//        String videoFileName = inputFile;
+//        String trimmedVideoFileName = linkToFile(videoFileName, false);
+////            trimmedVideoFileName = video_6s_to_68s.mp4
+//        String trimmedVideoFilePath = inputPath + trimmedVideoFileName;
+//
+//
+//
+//        int trackIndex = -1;
+//        for (int i = 0; i < extractor.getTrackCount(); i++) {
+//            MediaFormat format = extractor.getTrackFormat(i);
+//            String mime = format.getString(MediaFormat.KEY_MIME);
+//            if (mime.startsWith("video/avc")) {
+////                    was at video/avc on i = 0
+//                trackIndex = i;
+//                break;
+//            }
+//        }
+//        if (trackIndex == -1) {
+//            // no video track found
+//            return false;
+//        }
+//        extractor.selectTrack(trackIndex);
+//
+//        MediaFormat inputFormat = extractor.getTrackFormat(trackIndex);
+//        int width = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
+//        int height = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
+//        int rotation = 0;
+//        if (inputFormat.containsKey(MediaFormat.KEY_ROTATION)) {
+//            rotation = inputFormat.getInteger(MediaFormat.KEY_ROTATION);
+//        }
+//
+//        MediaMuxer muxer = new MediaMuxer(trimmedVideoFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//
+//        int outTrackIndex = muxer.addTrack(inputFormat);
+//        muxer.start();
+//
+//        ByteBuffer inputBuffer = ByteBuffer.allocate(inputFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+//        MediaCodec decoder = MediaCodec.createDecoderByType(inputFormat.getString(MediaFormat.KEY_MIME));
+//
+//        MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//        long currentTimeUs = 0;
+//
+//        decoder.configure(inputFormat, null, null, 0);
+//        decoder.start();
+//
+//        boolean isInputEOS = false;
+//        boolean isOutputEOS = false;
+//        while (!isOutputEOS) {
+//            if (!isInputEOS) {
+//                int inputIndex = decoder.dequeueInputBuffer(5000);
+//                if (inputIndex >= 0) {
+//                    inputBuffer = decoder.getInputBuffer(inputIndex);
+//                    int sampleSize = extractor.readSampleData(inputBuffer, 0);
+//                    if (sampleSize < 0) {
+//                        decoder.queueInputBuffer(inputIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+//                        isInputEOS = true;
+//                    } else {
+//                        decoder.queueInputBuffer(inputIndex, 0, sampleSize, extractor.getSampleTime(), 0);
+//                        extractor.advance();
+//                    }
+//                }
+//            }
+//
+//            int outputIndex = decoder.dequeueOutputBuffer(bufferInfo, 5000);
+//            if (outputIndex >= 0) {
+//                if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+//                    isOutputEOS = true;
+//                    bufferInfo.size = 0;
+//                }
+//
+//                if (bufferInfo.size > 0) {
+//                    ByteBuffer outputBuffer = decoder.getOutputBuffer(outputIndex);
+//                    outputBuffer.position(bufferInfo.offset);
+//                    outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
+//
+//                    if (currentTimeUs == 0 && bufferInfo.presentationTimeUs < startMs * 1000) {
+//                        decoder.releaseOutputBuffer(outputIndex, false);
+//                        continue;
+//                    }
+//                    if (bufferInfo.presentationTimeUs > endMs * 1000) {
+//                        break;
+//                    }
+//
+//                    bufferInfo.presentationTimeUs -= startMs * 1000;
+//                    muxer.writeSampleData(outTrackIndex, outputBuffer, bufferInfo);
+//                    currentTimeUs = bufferInfo.presentationTimeUs;
+//                }
+//
+//                decoder.releaseOutputBuffer(outputIndex, false);
+//            }
+//        }
+//
+//        muxer.stop();
+//        muxer.release();
+//        extractor.release();
+//        decoder.stop();
+//        decoder.release();
+//        recentFileLoc[0] = inputPath;
+//        recentFileName[0] = trimmedVideoFileName;
+//        // Show a message indicating that the trimming has completed successfully
+//        runOnUiThread(() -> {
+//            Toast.makeText(getApplicationContext(), "Video trimmed successfully", Toast.LENGTH_SHORT).show();
+//        });
+//
+//        return true;
+//
+//    }
+//
+//    private boolean trimVideoFile(String inputPath, String inputFile) {
+//        MediaExtractor extractor = null;
+//
+//        try {
+//            //inputPath = /storage/emulated/0/Download/
+//            //inputFile = video.mp4
+//            extractor = new MediaExtractor();
+//            extractor.setDataSource(inputPath + inputFile);
+//
+//            long startMs = convertStartHMSToSeconds() * 1000;
+//            long endMs = convertEndHMSToSeconds() * 1000;
+//
+//            String videoFileName = inputFile;
+//            String trimmedVideoFileName = linkToFile(videoFileName, false);
+////            trimmedVideoFileName = video_6s_to_68s.mp4
+//            String trimmedVideoFilePath = inputPath + trimmedVideoFileName;
+//
+//
+//            startMs = convertStartHMSToSeconds() * 1000;
+//            endMs = convertEndHMSToSeconds() * 1000;
+//
+//            File file = new File(inputPath, inputFile);
+//            file.createNewFile();
+//
+//            // Find and select the first video track in the video file
+//            int videoTrackIndex = -1;
+//            for (int i = 0; i < extractor.getTrackCount(); i++) {
+//                MediaFormat format = extractor.getTrackFormat(i);
+//                String mime = format.getString(MediaFormat.KEY_MIME);
+//                if (mime.startsWith("video/avc")) {
+////                    was at video/avc on i = 0
+//                    videoTrackIndex = i;
+//                    break;
+//                }
+//            }
+//            if (videoTrackIndex == -1) {
+//                // no video track found
+//                return false;
+//            }
+//            extractor.selectTrack(videoTrackIndex);
+//            // Extract video format information from the selected track
+//            MediaFormat format = extractor.getTrackFormat(videoTrackIndex);
+//
+//
+//            // Create a media muxer and initialize it with the output file
+//            MediaMuxer muxer = new MediaMuxer(trimmedVideoFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//            // Get the duration of the video track
+//            long durationUs = format.getLong(MediaFormat.KEY_DURATION);
+//            if (endMs == -1) {
+//                endMs = (int) (durationUs / 1000);
+//            }
+//            // Set the start position and end position for trimming the video track
+//            extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+//            int maxBufferSize = format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE);
+//            int trackIndex = muxer.addTrack(format);
+//            muxer.start();
+//            // Copy the samples from the selected track to the output file
+//            MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//            ByteBuffer dstBuf = ByteBuffer.allocate(maxBufferSize);
+//            int x = 0;
+//            while (true) {
+//                int sampleSize = extractor.readSampleData(dstBuf, 0);
+//                if (sampleSize < 0) {
+//                    break;
+//                }
+//                long presentationTimeUs = extractor.getSampleTime();
+//                if (presentationTimeUs > endMs * 1000) {
+//                    break;
+//                }
+//                bufferInfo.offset = 0;
+//                bufferInfo.size = sampleSize;
+//                bufferInfo.presentationTimeUs = presentationTimeUs - startMs * 1000;
+//                int bufferFlags = bufferInfo.flags;
+//                bufferInfo.flags = (bufferFlags == MediaCodec.BUFFER_FLAG_KEY_FRAME) ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0;
+//
+//                x += 1;
+//                Log.d("VideoTrimmer", "Loop ran: " + x + " times " + sampleSize);
+//                muxer.writeSampleData(trackIndex, dstBuf, bufferInfo);
+//                extractor.advance();
+//            }
+//
+//            // Release resources
+//            muxer.stop();
+//            muxer.release();
+//            extractor.release();
+//            recentFileLoc[0] = inputPath;
+//            recentFileName[0] = trimmedVideoFileName;
+//            // Show a message indicating that the trimming has completed successfully
+//            runOnUiThread(() -> {
+//                Toast.makeText(getApplicationContext(), "Video trimmed successfully", Toast.LENGTH_SHORT).show();
+//            });
+//
+//            return true;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            // Show an error message if the MediaExtractor fails to initialize
+//            runOnUiThread(() -> {
+//                Toast.makeText(getApplicationContext(), "Failed to trim video", Toast.LENGTH_SHORT).show();
+//            });
+//
+//        } finally {
+//            if (extractor != null) {
+//                extractor.release();
+//            }
+//        }
+//        return false;
+//    }
+
+
+//    private boolean trimVideoFile(String inputPath, String inputFile) throws IOException {
+//        try {
+//            MediaExtractor extractor = new MediaExtractor();
+//            extractor.setDataSource(inputPath + inputFile);
+//
+//            long startMs = convertStartHMSToSeconds() * 1000;
+//            long endMs = convertEndHMSToSeconds() * 1000;
+//
+//            String videoFileName = inputFile;
+//            String trimmedVideoFileName = linkToFile(videoFileName, false);
+//            String trimmedVideoFilePath = inputPath + trimmedVideoFileName;
+//
+//            //change input path to full video path
+//
+//
+//            File file = new File(inputPath, linkToFile(inputFile, false));
+//            file.createNewFile();
+//            String outputPath = file.getAbsolutePath();
+//
+//            // Find the video track index
+//            int videoTrackIndex = -1;
+//            for (int i = 0; i < extractor.getTrackCount(); i++) {
+//                MediaFormat format = extractor.getTrackFormat(i);
+//                String mime = format.getString(MediaFormat.KEY_MIME);
+//                if (mime.startsWith("video/")) {
+//                    videoTrackIndex = i;
+//                    break;
+//                }
+//            }
+//            if (videoTrackIndex == -1) {
+//                throw new RuntimeException("No video track found in " + inputPath);
+//            }
+//
+//            // Configure the extractor to read from the video track
+//            extractor.selectTrack(videoTrackIndex);
+//
+//            // Get the format of the video track
+//            MediaFormat videoFormat = extractor.getTrackFormat(videoTrackIndex);
+//
+//            try {
+//                // Add a new video track to the muxer
+////                is throwsIOexception needed?
+////                MediaMuxer muxer = new MediaMuxer(trimmedVideoFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//                MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//                int newVideoTrackIndex = muxer.addTrack(videoFormat);
+//                muxer.start();
+//
+//                // Configure the extractor to read from the beginning of the selected range
+//                extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+//
+//                // Process the video frames in the selected range and write them to the output file
+//                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//                ByteBuffer dstBuf = ByteBuffer.allocate(videoFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+//                while (true) {
+//                    int sampleSize = extractor.readSampleData(dstBuf, 0);
+//                    if (sampleSize < 0) {
+//                        break;
+//                    }
+//                    long presentationTimeUs = extractor.getSampleTime();
+//                    if (presentationTimeUs > endMs * 1000) {
+//                        break;
+//                    }
+//                    bufferInfo.offset = 0;
+//                    bufferInfo.size = sampleSize;
+//                    bufferInfo.presentationTimeUs = presentationTimeUs - startMs * 1000;
+//                    int bufferFlags = bufferInfo.flags;
+//                    bufferInfo.flags = (bufferFlags == MediaCodec.BUFFER_FLAG_KEY_FRAME) ? MediaCodec.BUFFER_FLAG_KEY_FRAME : 0;
+//
+//                    muxer.writeSampleData(newVideoTrackIndex, dstBuf, bufferInfo);
+//                    extractor.advance();
+//                }
+//
+//                muxer.stop();
+//                muxer.release();
+//                extractor.release();
+//                recentFileLoc[0] = inputPath;
+//                recentFileName[0] = trimmedVideoFileName;
+//                runOnUiThread(() -> {
+//                    Toast.makeText(getApplicationContext(), "Video trimmed successfully", Toast.LENGTH_SHORT).show();
+//                });
+//                return true;
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//                runOnUiThread(() -> {
+//                    Toast.makeText(getApplicationContext(), "Failed to trim video", Toast.LENGTH_SHORT).show();
+//                });
+//
+//            } finally {
+//                if (extractor != null) {
+//                    extractor.release();
+//                }
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        } catch (RuntimeException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return false;
+//    }
+
+
+//    private void trimVideo(String videoPath, int startMs, int endMs) throws IOException {
+//        // Set up media extractor to read from the video file.
+//        MediaExtractor extractor = new MediaExtractor();
+//        extractor.setDataSource(videoPath);
+//
+//        // Find the video track.
+//        int videoTrackIndex = selectTrack(extractor, "video/");
+//
+//        // Prepare the output file.
+//        String outputPath = getFilesDir().getAbsolutePath() + "/trimmed_video.mp4";
+//        MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//
+//        // Set up variables for keeping track of time.
+//        int currentSample = 0;
+//        boolean sawStart = false;
+//        boolean sawEnd = false;
+//
+//        // Seek to the starting position of the trim.
+//        extractor.seekTo(startMs * 1000, MediaExtractor.SEEK_TO_PREVIOUS_SYNC);
+//
+//        ByteBuffer dstBuf = ByteBuffer.allocate(65536);
+//
+//        // Write the samples to the output file until the end position of the trim is reached.
+//        while (!sawEnd) {
+//            int trackIndex = extractor.getSampleTrackIndex();
+//            if (trackIndex == videoTrackIndex) {
+//                // Copy the sample to the output file.
+//                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//                bufferInfo.size = extractor.readSampleData(dstBuf, 0);
+//                if (bufferInfo.size < 0) {
+//                    sawEnd = true;
+//                    bufferInfo.size = 0;
+//                } else {
+//                    bufferInfo.presentationTimeUs = extractor.getSampleTime();
+//                    if (!sawStart && bufferInfo.presentationTimeUs < startMs * 1000) {
+//                        // Skip this sample.
+//                        extractor.advance();
+//                        continue;
+//                    }
+//                    if (bufferInfo.presentationTimeUs > endMs * 1000) {
+//                        sawEnd = true;
+//                        break;
+//                    }
+//                    bufferInfo.flags = extractor.getSampleFlags();
+//                    int track = muxer.getTrack(trackIndex);
+//                    muxer.writeSampleData(track, dstBuf, bufferInfo);
+//                    currentSample++;
+//                }
+//                extractor.advance();
+//            } else if (trackIndex == -1) {
+//                sawEnd = true;
+//            } else {
+//                extractor.advance();
+//            }
+//        }
+//
+//        // Release the resources.
+//        extractor.release();
+//        muxer.release();
+//    }
+
+//
+//    private boolean trimVideoFile(String inputPath, String inputFile) {
+//        TextView result_link = (TextView) findViewById(R.id.result_link);
+//
+//        try {
+//            String videoPath = inputPath + inputFile;
+//            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//            retriever.setDataSource(videoPath);
+//            String durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+//            long duration = Long.parseLong(durationString);
+//
+//            // set the start and end time for trimming
+//            long startTime = convertStartHMSToSeconds();
+//            long endTime = convertEndHMSToSeconds();
+//
+//
+////        check if video can be trimmed with times given
+//            if (endTime > duration / 1000) {
+//                result_link.setText("End time cannot be greater than video duration");
+//                return false;
+//            } else if (startTime > duration / 1000) {
+//                result_link.setText("Start time cannot be greater than video duration");
+//                return false;
+//            } else if (endTime <= startTime) {
+//                result_link.setText("Start time cannot be greater than End time");
+//                return false;
+//            }
+//
+//
+//            // create a new file for the trimmed video
+//
+//
+//            String videoFileName = inputFile;
+//            String trimmedVideoFileName = linkToFile(videoFileName, false);
+//            String trimmedVideoFilePath = inputPath + trimmedVideoFileName;
+//
+//
+//            File file = new File(inputPath, linkToFile(inputFile, false));
+//            file.createNewFile();
+//            String outputPath = file.getAbsolutePath();
+//
+//            // create a media extractor for the video
+//            MediaExtractor extractor = new MediaExtractor();
+//            extractor.setDataSource(videoPath);
+//
+//            // select the first video track from the media extractor
+////            int videoTrackIndex = selectTrack(extractor, "video/");
+//            extractor.selectTrack(0);
+//
+//            // retrieve the video format from the video track
+//            MediaFormat videoFormat = extractor.getTrackFormat(0);
+//
+//            // create a media muxer for the trimmed video
+//            MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+//
+//            // add a new video track to the media muxer
+//            int videoTrack = muxer.addTrack(videoFormat);
+//
+//            // set the start and end time for trimming
+//            extractor.seekTo(startTime * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+//
+//            // create a buffer for the input and output video frames
+//            ByteBuffer inputBuffer = ByteBuffer.allocate(videoFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+//            ByteBuffer outputBuffer = ByteBuffer.allocate(videoFormat.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+//
+//            // set up the media codec for the video track
+//            MediaCodec codec = MediaCodec.createDecoderByType(videoFormat.getString(MediaFormat.KEY_MIME));
+//            codec.configure(videoFormat, null, null, 0);
+//            codec.start();
+//
+//            // write the output video data to the media muxer
+//            muxer.start();
+//
+//            while (true) {
+//                int sampleSize = extractor.readSampleData(inputBuffer, 0);
+//                if (sampleSize < 0) {
+//                    // reached the end of the video
+//                    break;
+//                }
+//
+////                might need to edit
+//                long presentationTime = extractor.getSampleTime();
+//                if (presentationTime > endTime * 1000) {
+//                    // reached the end of the trimmed portion
+//                    break;
+//                }
+//
+//                // decode the input video data
+//                int inputBufferIndex = codec.dequeueInputBuffer(-1);
+//                if (inputBufferIndex >= 0) {
+//                    inputBuffer.clear();
+//                    inputBuffer.put(inputBuffer.array(), 0, sampleSize);
+//                    codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, presentationTime, 0);
+//                }
+//
+//                // retrieve the output video data from the codec
+//                MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
+//                int outputBufferIndex = codec.dequeueOutputBuffer(bufferInfo, 0);
+//                if (outputBufferIndex >= 0) {
+//                    outputBuffer = codec.getOutputBuffer(outputBufferIndex);
+//                    muxer.writeSampleData(videoTrack, outputBuffer, bufferInfo);
+//                    codec.releaseOutputBuffer(outputBufferIndex, false);
+//                }
+//
+//                // advance to the next video sample
+//                extractor.advance();
+//            }
+//
+//            // stop the media codec and media muxer
+//            codec.stop();
+//            codec.release();
+//            muxer.stop();
+//            muxer.release();
+//
+//            // show a message to the user that the video has been trimmed
+//            Toast.makeText(this, "Video trimmed and saved to " + inputPath, Toast.LENGTH_LONG).show();
+//
+//
+//            recentFileLoc[0] = inputPath;
+//            recentFileName[0] = trimmedVideoFileName;
+//
+//        } catch (Exception e) {
+//
+//            e.printStackTrace();
+//            return false;
+//        }
+//
+//
+//        return true;
+//    }
+
+
+
+private String getRealPathFromUri(Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor == null) {
+            return null;
+        }
+        int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String filePath = cursor.getString(columnIndex);
+        cursor.close();
+        return filePath;
+    }
+
+    private String getRealPathFromUri(Uri uri) {
+            String filePath = null;
+            if (uri.getScheme().equals("content")) {
+                Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME);
+                    filePath = cursor.getString(columnIndex);
+                    cursor.close();
+                }
+            } else if (uri.getScheme().equals("file")) {
+                filePath = uri.getPath();
+            }
+            return filePath;
+        }
+
+        public void performAsyncTask() {
+                    Observable<String> asyncTaskObservable = Observable.create(emitter -> {
+                        // Perform your asynchronous task here
+                        // Emit the result or error using the emitter
+                        String result = doSomeAsyncTask();
+                        emitter.onNext(result);
+                        emitter.onComplete();
+                    });
+
+                    asyncTaskObservable
+                            .subscribeOn(Schedulers.io()) // Execute the task on a background thread
+                            .observeOn(AndroidSchedulers.mainThread()) // Observe the result on the main thread
+                            .subscribe(result -> {
+                                // Handle the emitted result
+                                // This block will run on the main thread
+                                // Update UI or perform further operations with the result
+                            }, error -> {
+                                // Handle any errors that occurred during the task
+                                // This block will run on the main thread
+                            });
+                }
+
+can add about section
+dialog prompt if user would like to download a video already in downloads

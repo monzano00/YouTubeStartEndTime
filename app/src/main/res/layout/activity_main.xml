@@ -152,6 +152,18 @@
         app:layout_constraintTop_toBottomOf="@+id/end_hour" />
 
     <Button
+        android:id="@+id/storage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:onClick="storageClip"
+        android:text="@string/storage"
+        app:layout_constraintEnd_toEndOf="@+id/end_min"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/end_min"
+        app:layout_constraintTop_toBottomOf="@+id/end_hour" />
+
+    <Button
         android:id="@+id/download_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -224,6 +236,35 @@
         android:longClickable="false"
         android:text="@string/paste"
         app:layout_constraintBottom_toTopOf="@+id/start_sec"
+        app:layout_constraintEnd_toEndOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/github_btn"
+        android:layout_width="91dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="196dp"
+        android:linksClickable="false"
+        android:longClickable="false"
+        android:text="@string/github"
+        app:layout_constraintBottom_toTopOf="@+id/start_sec"
+        app:layout_constraintEnd_toEndOf="@+id/textView2" />
+
+    <Button
+        android:id="@+id/update_btn"
+        android:layout_width="91dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="116dp"
+        android:layout_marginRight="116dp"
+        android:layout_marginBottom="16dp"
+        android:enabled="false"
+        android:linksClickable="false"
+        android:longClickable="false"
+        android:onClick="checkForUpdates"
+        android:text="@string/update"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="@+id/textView2" />
 
     <Button

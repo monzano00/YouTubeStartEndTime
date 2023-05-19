@@ -1,0 +1,217 @@
+ public void videoTrim(String videoFilePath) {
+        // open the file picker to select a video file
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+
+        intent.setType("video/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Video"), PICK_VIDEO_REQUEST);
+
+// extract frames from the video and display them in a preview
+        MediaExtractor extractor = new MediaExtractor();
+        try {
+            extractor.setDataSource(videoFilePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        int videoTrackIndex = findVideoTrackIndex(extractor);
+        MediaFormat format = extractor.getTrackFormat(videoTrackIndex);
+        MediaCodec decoder = null;
+        try {
+            decoder = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        decoder.configure(format, surface, null, 0);
+        decoder.start();
+
+// select a start and end time
+        int startTimeMs = 5000;
+        int endTimeMs = 10000;
+
+// extract video frames within the selected range
+        extractor.seekTo(startTimeMs * 1000, MediaExtractor.SEEK_TO_CLOSEST_SYNC);
+        ByteBuffer inputBuffer = ByteBuffer.allocate(0);
+        while (extractor.getSampleTime() < endTimeMs * 1000) {
+            int index = decoder.dequeueInputBuffer(10000);
+            if (index >= 0) {
+                inputBuffer = decoder.getInputBuffer(index);
+                int size = extractor.readSampleData(inputBuffer, 0);
+                if (size < 0) {
+                    decoder.queueInputBuffer(index, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+                } else {
+                    decoder.queueInputBuffer(index, 0, size, extractor.getSampleTime(), 0);
+                    extractor.advance();
+                }
+            }
+            MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+            int outputBufferIndex = decoder.dequeueOutputBuffer(info, 10000);
+            if (outputBufferIndex >= 0) {
+                ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+                byte[] buffer = new byte[info.size];
+                outputBuffer.get(buffer);
+                muxer.writeSampleData(trackIndex, outputBuffer, info);
+                decoder.releaseOutputBuffer(outputBufferIndex, false);
+            }
+        }
+
+// combine trimmed video frames into a new video file
+        MediaMuxer muxer = new MediaMuxer(outputFilePath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+        int trackIndex = muxer.addTrack(format);
+        muxer.start();
+
+    }
+
+    /*
+     utility method called within the trimVideoFile() method to
+     find the index of the video track in the input video file.
+     It takes an instance of MediaExtractor as a parameter and
+     returns an integer representing the index of the first video
+     track in the input video file.
+     */
+
+    private int findVideoTrackIndex(MediaExtractor extractor) {
+        int numTracks = extractor.getTrackCount();
+        for (int i = 0; i < numTracks; i++) {
+            MediaFormat format = extractor.getTrackFormat(i);
+            String mime = format.getString(MediaFormat.KEY_MIME);
+            if (mime.startsWith("video/")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+
+
+
+
+
+
+    /*
+    We're checking that the request code matches the one
+    we used to start the file picker (PICK_VIDEO_REQUEST),
+    and that the result code is RESULT_OK. If those
+     conditions are met, we retrieve the selected video file
+      URI and convert it to a file path
+      using the getRealPathFromURI() method.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_VIDEO_REQUEST && resultCode == RESULT_OK) {
+            // get the selected video file
+            Uri videoUri = data.getData();
+            String videoPath = getRealPathFromURI(videoUri);
+            // start processing the video file
+            processVideoFile(videoPath);
+        }
+    }
+
+    /*
+    used to convert the video URI to a file path, since the MediaExtractor API
+    requires a file path to access the video data. This method queries the
+    MediaStore content provider to get the file path from the URI.
+     */
+    private String getRealPathFromURI(Uri uri) {
+        String[] projection = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
+
+    private void processVideoFile(String videoPath) {
+        try {
+            // set up MediaExtractor to read the video file
+            MediaExtractor extractor = new MediaExtractor();
+            extractor.setDataSource(videoPath);
+            int trackIndex = selectTrack(extractor);
+            extractor.selectTrack(trackIndex);
+            MediaFormat format = extractor.getTrackFormat(trackIndex);
+            int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+
+            // calculate the start and end timestamps (in microseconds)
+            long startUs = 500000; // start at 0.5 seconds
+            long endUs = 3000000; // end at 3 seconds
+
+            // set up MediaMuxer to write the trimmed video file
+            String outputPath = Environment.getExternalStorageDirectory() + "/trimmed_video.mp4";
+            MediaMuxer muxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+            int videoTrackIndex = muxer.addTrack(format);
+            muxer.start();
+
+            // set up MediaCodec to decode and encode the video frames
+            MediaCodec decoder = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+            decoder.configure(format, null, null, 0);
+            Surface surface = decoder.createInputSurface();
+            decoder.start();
+            MediaCodec encoder = MediaCodec.createEncoderByType(format.getString(MediaFormat.KEY_MIME));
+            encoder.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            encoder.start();
+
+            // read and decode the video frames, and write the trimmed frames to the muxer
+            ByteBuffer inputBuffer = ByteBuffer.allocate(format.getInteger(MediaFormat.KEY_MAX_INPUT_SIZE));
+            boolean isEOS = false;
+            long presentationTimeUs = 0;
+            while (!isEOS) {
+                int sampleSize = extractor.readSampleData(inputBuffer, 0);
+                if (sampleSize < 0) {
+                    isEOS = true;
+                    sampleSize = 0;
+                }
+                long presentationTimeUsOld = extractor.getSampleTime();
+                if (presentationTimeUsOld < startUs) {
+                    extractor.advance();
+                    continue;
+                }
+                if (presentationTimeUsOld > endUs) {
+                    break;
+                }
+                presentationTimeUs += 1000000L / sampleRate;
+                int inputBufferIndex = decoder.dequeueInputBuffer(5000);
+                if (inputBufferIndex >= 0) {
+                    inputBuffer.clear();
+                    inputBuffer.put(inputBufferIndex, 0, sampleSize);
+                    decoder.queueInputBuffer(inputBufferIndex, 0, sampleSize, presentationTimeUs, 0);
+                }
+                MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+                int outputBufferIndex = decoder.dequeueOutputBuffer(info, 5000);
+                while (outputBufferIndex >= 0) {
+                    ByteBuffer outputBuffer = decoder.getOutputBuffer(outputBufferIndex);
+                    outputBuffer.position(info.offset);
+                    outputBuffer.limit(info.offset + info.size);
+                    encoder.queueInputBuffer(outputBufferIndex, 0, info.size, presentationTimeUs, 0);
+                    outputBufferIndex = decoder.dequeueOutputBuffer(info, 0);
+                }
+                int outputBufferInde = encoder.dequeueOutputBuffer(info, 5000);
+                while (outputBufferInde >= 0) {
+                    ByteBuffer outputBuffer = encoder.getOutputBuffer(outputBufferInde);
+                    muxer.writeSampleData(videoTrackIndex, outputBuffer, info);
+                    encoder.releaseOutputBuffer(outputBufferInde, false);
+                    outputBufferInde = encoder.dequeueOutputBuffer(info, 0);
+                }
+            }
+            extractor.unselectTrack(trackIndex);
+            // release resources
+            extractor.release();
+            decoder.stop();
+            decoder.release();
+            encoder.stop();
+            encoder.release();
+            muxer.stop();
+            muxer.release();
+
+            // show a Toast message indicating the path of the trimmed video file
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Trimmed video saved to " + outputPath, Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
